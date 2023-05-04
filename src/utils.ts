@@ -44,11 +44,15 @@ export async function formConnection(fable_1: fable, fable_2: fable) {
   if (match && match[0]) {
 
     const id_pair = getSzudzikPair(fable_1.id, fable_2.id);
-    const existingConnection = await prisma.fable_connection.findUnique({
+    console.log(await prisma.fable_connection.findMany())
+    const existingConnection = await prisma.fable_connection.findFirst({
       where: {
         id_pair,
       },
     });
+
+    console.log(id_pair, existingConnection);
+
     if(existingConnection) { return false; }
 
     await prisma.fable_connection.create({
