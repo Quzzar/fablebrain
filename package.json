@@ -1,0 +1,16 @@
+{
+  "name": "fable-brain",
+  "module": "index.ts",
+  "devDependencies": {
+    "bun-types": "^0.5.0"
+  },
+  "scripts": {
+    "start": "bun run --watch index.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "4.13.0",
+    "@supabase/supabase-js": "^2.21.0",
+    "prisma": "^4.13.0"
+  }
+}

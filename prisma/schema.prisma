@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model fable {
+  id                                                  Int                @id @default(autoincrement())
+  created_at                                          DateTime?          @default(now()) @db.Timestamptz(6)
+  summary                                             String             @db.VarChar
+  conclusion                                          String?            @db.VarChar
+  goal                                                String?            @db.VarChar
+  fable_connection_fable_connection_fable_id_1Tofable fable_connection[] @relation("fable_connection_fable_id_1Tofable")
+  fable_connection_fable_connection_fable_id_2Tofable fable_connection[] @relation("fable_connection_fable_id_2Tofable")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model fable_connection {
+  fable_id_1                               Int
+  fable_id_2                               Int
+  strength                                 Int       @db.SmallInt
+  created_at                               DateTime? @default(now()) @db.Timestamptz(6)
+  id_pair                                  BigInt    @id @default(autoincrement())
+  fable_fable_connection_fable_id_1Tofable fable     @relation("fable_connection_fable_id_1Tofable", fields: [fable_id_1], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  fable_fable_connection_fable_id_2Tofable fable     @relation("fable_connection_fable_id_2Tofable", fields: [fable_id_2], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model generated_text {
+  id          Int       @id @default(autoincrement())
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  model       String    @db.VarChar
+  prompt      String    @db.VarChar
+  result      String    @db.VarChar
+  temperature Float     @default(0) @db.Real
+}
