@@ -5,14 +5,14 @@ const TOP_CONNECTIONS = 5;
 const USEFUL_CONNECTION_THRESHOLD = 50;
 const RECENT_MEMORY_TIME = 10 * 60 * 1000; // 10 minutes
 
-async function searchEntireMemory(brain: Brain): Promise<FableConnection[]>{
+async function searchEntireMemory(fable: Fable): Promise<FableConnection[]>{
 
   console.log("Searching entire memory...");
 
   const { data, error } = await supabase
     .from('fable_connection')
     .select('*')
-    .or(`fable_id_1.eq.${brain.latest_fable_id},fable_id_2.eq.${brain.latest_fable_id}`)
+    .or(`fable_id_1.eq.${fable.id},fable_id_2.eq.${fable.id}`)
     .order('strength', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(TOP_CONNECTIONS);
@@ -35,7 +35,7 @@ async function searchEntireMemory(brain: Brain): Promise<FableConnection[]>{
           fable_id_1: fable_connection.fable_id_1,
           fable_id_2: fable_connection.fable_id_2,
           strength: fable_connection.strength,
-          brain_id: brain.id,
+          brain_id: fable.brain_id,
           created_at: convertDateToSupabaseFormat(new Date()),
           remove_at: convertDateToSupabaseFormat(new Date(new Date().getTime() + RECENT_MEMORY_TIME)),
         },
@@ -52,14 +52,14 @@ async function searchEntireMemory(brain: Brain): Promise<FableConnection[]>{
 }
 
 
-export async function searchMemory(brain: Brain){
+export async function searchMemory(fable: Fable){
 
   console.log("Searching recent memory...");
 
   const { data } = await supabase
     .from('recently_recalled')
     .select('*')
-    .or(`fable_id_1.eq.${brain.latest_fable_id},fable_id_2.eq.${brain.latest_fable_id}`)
+    .or(`fable_id_1.eq.${fable.id},fable_id_2.eq.${fable.id}`)
     .order('strength', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(TOP_CONNECTIONS);
@@ -80,7 +80,7 @@ export async function searchMemory(brain: Brain){
           fable_id_1: recently_recalled.fable_id_1,
           fable_id_2: recently_recalled.fable_id_2,
           strength: recently_recalled.strength,
-          brain_id: brain.id,
+          brain_id: fable.brain_id,
           created_at: convertDateToSupabaseFormat(new Date()),
           remove_at: convertDateToSupabaseFormat(new Date(new Date().getTime() + RECENT_MEMORY_TIME)),
         },
@@ -95,7 +95,7 @@ export async function searchMemory(brain: Brain){
   // If we don't have enough useful connections, search the entire memory for more
   if(usefulConnections.length < TOP_CONNECTIONS){
     console.log(`Need more connections,`);
-    const moreConnections = await searchEntireMemory(brain);
+    const moreConnections = await searchEntireMemory(fable);
 
     // Remove duplicates
     const connectionMap = new Map<BigInt, FableConnection>();
@@ -141,4 +141,23 @@ export async function forgetRecentMemories(brain: Brain){
     console.error("Error forgetting recently recalled: ", error);
   }
 
+}
+
+
+export async function getRecentFables(brain: Brain, minutes=10) {
+  // In order of most recently created
+  const { data } = await supabase
+    .from("fable")
+    .select('*')
+    .eq("brain_id", brain.id)
+    .gte(
+      "created_at",
+      new Date(Date.now() - minutes * 60 * 1000).toISOString()
+    )
+    .order('created_at', { ascending: false });
+
+  if (!data) {
+    return [];
+  }
+  return data as Fable[];
 }

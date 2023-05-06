@@ -20,8 +20,9 @@ export async function getBrainFromAuth(req: Request): Promise<Brain | null> {
     const { data } = await supabase
       .from('brain')
       .select('*')
-      .eq('auth_token', authToken);
-    return (data && data.length > 0) ? data[0] as Brain : null;
+      .eq('auth_token', authToken)
+      .single();
+    return data ? data as Brain : null;
   }
   return null;
 }
@@ -68,13 +69,15 @@ export async function formConnection(fable_1: Fable, fable_2: Fable) {
   }
 
   // Determine connection strength
-  const result = await generateResponseChatGPT(
+  const result = await generateResponseGPT4(
     `
-    Please respond with only a number between 0 and 100 for how similar the same general premise is on the following two sentences. Where a 0 is that they're not even remotely similar and a 100 is that they're referring to the exact same event.
-      
-    - ${fable_1.summary.trim()}
-  
-    - ${fable_2.summary.trim()}
+    Please respond with only a number between 0 and 100 for how similar the two following inputs are to each other. Where a 0 is that they're not even remotely similar and a 100 is that they're the exact same input.
+
+    ## Input 1
+    ${fable_1.input.trim()}
+
+    ## Input 2
+    ${fable_2.input.trim()}
     `
   );
   if(!result) { return false; }
@@ -100,57 +103,3 @@ export async function formConnection(fable_1: Fable, fable_2: Fable) {
     return false;
   }
 }
-
-const SEARCH_BACK_MINUTES = 10;
-
-export async function getRecentFables() {
-  const { data, error } = await supabase
-    .from("fable")
-    .select()
-    .gte(
-      "created_at",
-      new Date(Date.now() - SEARCH_BACK_MINUTES * 60 * 1000).toISOString()
-    );
-
-  if (error || data.length === 0) {
-    console.error(error);
-    return [];
-  }
-  return data;
-}
-
-/*
-const INACTIVITY_MINUTES = 3;
-const MAX_FABLES = 50;
-const MAX_SEARCHES = 10;
-
-async function searchBack(i: number, fables: any[]): Promise<any[]> {
-
-  console.log(i, fables.length)
-
-  if (fables.length >= MAX_FABLES || i >= MAX_SEARCHES) {
-    return fables;
-  }
-
-  const searchBackTime = new Date(Date.now() - (i * SEARCH_BACK_MINUTES * 60 * 1000));
-
-  const { data, error } = await supabase
-    .from("fable")
-    .select()
-    .gte("created_at", searchBackTime.toISOString());
-
-  if (error || data.length === 0) {
-    console.error(error);
-    return fables;
-  }
-
-  searchBackTime.setMinutes(searchBackTime.getMinutes() - INACTIVITY_MINUTES);
-
-  console.log(new Date(data[0].created_at).toISOString(), searchBackTime.toISOString());
-
-  if(new Date(data[0].created_at) > searchBackTime){
-    return searchBack(i + 1, data);
-  }
-  return data;
-}
-*/

@@ -16,10 +16,11 @@ export async function generateResponseGPT4(
     .eq("temperature", temperature)
     .eq("model", model)
     .order("created_at")
-    .limit(1);
+    .limit(1)
+    .single() as { data: GeneratedText | null, error: any };
 
   // If we don't have this result yet, generate a result from OpenAI
-  if (!generatedText || generatedText.length === 0 || fetchError) {
+  if (!generatedText || fetchError) {
 
     let startTime = performance.now();
 
@@ -31,11 +32,6 @@ export async function generateResponseGPT4(
       },
       body: JSON.stringify({
         messages: [
-          {
-            role: "system",
-            content:
-              "You are an oracle for determining the lessons learned from events and dictating the best choices to wisely achieve goals.",
-          },
           { role: "user", content: prompt },
         ],
         model,
@@ -68,7 +64,7 @@ export async function generateResponseGPT4(
     return result;
 
   } else {
-    return generatedText[0].result;
+    return generatedText.result;
   }
 }
 
@@ -88,10 +84,11 @@ export async function generateResponseChatGPT(
     .eq("temperature", temperature)
     .eq("model", model)
     .order("created_at")
-    .limit(1);
+    .limit(1)
+    .single() as { data: GeneratedText | null, error: any };
 
   // If we don't have this result yet, generate a result from OpenAI
-  if (!generatedText || generatedText.length === 0 || fetchError) {
+  if (!generatedText || fetchError) {
 
     let startTime = performance.now();
 
@@ -103,11 +100,6 @@ export async function generateResponseChatGPT(
       },
       body: JSON.stringify({
         messages: [
-          {
-            role: "system",
-            content:
-              "You are an oracle for determining the lessons learned from events and dictating the best choices to wisely achieve goals.",
-          },
           { role: "user", content: prompt },
         ],
         model,
@@ -140,7 +132,7 @@ export async function generateResponseChatGPT(
     return result;
 
   } else {
-    return generatedText[0].result;
+    return generatedText.result;
   }
 }
 
@@ -160,10 +152,11 @@ export async function generateResponseGPT3(
     .eq("temperature", temperature)
     .eq("model", model)
     .order("created_at")
-    .limit(1);
+    .limit(1)
+    .single() as { data: GeneratedText | null, error: any };
 
   // If we don't have this result yet, generate a result from OpenAI
-  if (!generatedText || generatedText.length === 0 || fetchError) {
+  if (!generatedText || fetchError) {
 
     let startTime = performance.now();
 
@@ -205,6 +198,6 @@ export async function generateResponseGPT3(
     return result;
 
   } else {
-    return generatedText[0].result;
+    return generatedText.result;
   }
 }

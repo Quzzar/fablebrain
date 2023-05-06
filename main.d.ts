@@ -1,5 +1,4 @@
 
-
 interface GeneratedText {
   id: number,
   model: string,
@@ -12,11 +11,16 @@ interface GeneratedText {
 
 interface Fable {
   id: number,
-  summary: string,
+  input: string,
   conclusion: string,
   goal: string,
   brain_id: number,
+  resulting_action_id: number,
   created_at: string,
+}
+
+interface FableAction extends Fable {
+  action: Action,
 }
 
 interface Brain {
@@ -24,7 +28,6 @@ interface Brain {
   user_id: number,
   name: string,
   description: string,
-  latest_fable_id: number,
   created_at: string,
 }
 
@@ -39,5 +42,30 @@ interface FableConnection {
 interface RecentlyRecalled extends FableConnection {
   brain_id: number,
   removed_at: string,
+}
+
+interface Action {
+  id: number,
+  brain_id: number,
+  name: string,
+  description: string,
+  args: Arg[],
+}
+
+interface Arg {
+  name: string,
+  description: string,
+  type: 'string' | 'number' | 'boolean' | 'enum',
+  extra?: {
+    number?: {
+      min?: number,
+      max?: number,
+    },
+    enum?: string[],
+    string?: {
+      min?: number,
+      max?: number,
+    }
+  },
 }
 
