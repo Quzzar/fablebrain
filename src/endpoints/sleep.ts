@@ -1,12 +1,16 @@
-import { generateResponseGPT4 } from "../openai";
-import { supabase } from "../supabase";
-import { createResponse, formConnection, getRecentFables } from "../utils";
+import { generateResponseGPT4 } from "../services/openai";
+import { supabase } from "../services/supabase";
+import { createResponse, formConnection, getBrainFromAuth, getRecentFables } from "../utils";
 
 export default async function sleep(req: Request): Promise<Response> {
+  const brain = await getBrainFromAuth(req);
+  if(!brain){
+    return createResponse(`Please provide a valid auth token`, 401);
+  }
 
   if (req.method === "POST") {
     try {
-      return await processSleep(req);
+      return await processSleep(req, brain);
     } catch (e) {
       console.error(`Error sleeping: ${e}`);
       return createResponse(`Error sleeping: ${e}`, 500);
@@ -16,9 +20,9 @@ export default async function sleep(req: Request): Promise<Response> {
   return createResponse(`Unknown method: ${req.method}`, 405);
 }
 
-async function processSleep(req: Request): Promise<Response> {
+async function processSleep(req: Request, brain: Brain): Promise<Response> {
 
-  const { data: fables, error } = await supabase.from('fable').select('*');
+  const { data: fables, error } = await supabase.from('fable').select('*').eq('brain_id', brain.id);
 
   if(!fables || error){
     return createResponse(`Error fetching fables`, 500);

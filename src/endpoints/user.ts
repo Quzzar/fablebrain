@@ -1,4 +1,4 @@
-import { supabase } from "../supabase";
+import { supabase } from "../services/supabase";
 import { createResponse } from "../utils";
 
 export default async function user(req: Request): Promise<Response> {

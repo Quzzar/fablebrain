@@ -1,9 +1,36 @@
-import { supabase } from "./supabase";
-import { generateResponseChatGPT, generateResponseGPT4 } from "./openai";
+import { supabase } from "./services/supabase";
+import { generateResponseChatGPT, generateResponseGPT4 } from "./services/openai";
 
-function getUniqueNumber(x: number, y: number){
+
+export function convertDateToSupabaseFormat(date: Date){
+  return date.toISOString().replace('T', ' ').replace('Z', '+00');
+}
+
+
+export async function getBrainFromAuth(req: Request): Promise<Brain | null> {
+  const authorization = req.headers.get('Authorization');
+  if(!authorization){
+    return null;
+  }
+
+  const match = authorization.match(/Bearer (.+)/);
+  if(match && match[1]){
+    const authToken = match[1];
+
+    const { data } = await supabase
+      .from('brain')
+      .select('*')
+      .eq('auth_token', authToken);
+    return (data && data.length > 0) ? data[0] as Brain : null;
+  }
+  return null;
+}
+
+
+export function getUniqueNumber(x: number, y: number){
   return ((x + y) * (x + y + 1)) / 2 + Math.min(x,y);
 }
+
 
 export function createResponse(
   message: string,
@@ -23,6 +50,7 @@ export function createResponse(
     }
   );
 }
+
 
 export async function formConnection(fable_1: Fable, fable_2: Fable) {
   if (fable_1.id === fable_2.id) {

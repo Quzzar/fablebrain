@@ -19,6 +19,15 @@ interface Fable {
   created_at: string,
 }
 
+interface Brain {
+  id: number,
+  user_id: number,
+  name: string,
+  description: string,
+  latest_fable_id: number,
+  created_at: string,
+}
+
 interface FableConnection {
   id_pair: BigInt,
   fable_id_1: number,
@@ -27,11 +36,8 @@ interface FableConnection {
   created_at: string,
 }
 
-interface Brain {
-  id: number,
-  user_id: number,
-  name: string,
-  description: string,
-  created_at: string,
+interface RecentlyRecalled extends FableConnection {
+  brain_id: number,
+  removed_at: string,
 }
 
