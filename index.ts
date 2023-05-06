@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client/edge';
 import feed from "./src/endpoints/feed";
 import user from "./src/endpoints/user";
 import { initSupabase } from "./src/supabase";
@@ -6,9 +5,6 @@ import sleep from "./src/endpoints/sleep";
 
 // Init Supabase
 initSupabase();
-
-// Init Prisma
-export const prisma = new PrismaClient();
 
 // Run the server
 const server = Bun.serve({
@@ -22,5 +18,3 @@ const server = Bun.serve({
   },
 });
 
-// Disconnect PrismaClient when the application exits
-// TODO: await prisma.$disconnect();

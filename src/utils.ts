@@ -1,12 +1,8 @@
-import { fable } from "@prisma/client";
 import { supabase } from "./supabase";
-import { prisma } from "..";
-import { generateResponseGPT4 } from "./openai";
+import { generateResponseChatGPT, generateResponseGPT4 } from "./openai";
 
-
-export function getSzudzikPair(a: number, b: number){
-  if(a < 0 || b < 0) throw new Error("a and b must be >= 0");
-  return a >= b ? a * a + a + b : a + b * b;
+function getUniqueNumber(x: number, y: number){
+  return ((x + y) * (x + y + 1)) / 2 + Math.min(x,y);
 }
 
 export function createResponse(
@@ -14,8 +10,10 @@ export function createResponse(
   status: number,
   data?: any
 ): Response {
+  // Endpoints follow the JSend specification
   return new Response(
     JSON.stringify({
+      status: (`${status}`.startsWith('1') || `${status}`.startsWith('2')) ? 'success' : (`${status}`.startsWith('5') ? 'error' : 'fail'),
       message,
       data,
     }),
@@ -26,11 +24,23 @@ export function createResponse(
   );
 }
 
-export async function formConnection(fable_1: fable, fable_2: fable) {
-  if(fable_1.id === fable_2.id) { return false; }
-  
+export async function formConnection(fable_1: Fable, fable_2: Fable) {
+  if (fable_1.id === fable_2.id) {
+    return false;
+  }
+
+  const id_pair = getUniqueNumber(fable_1.id, fable_2.id);
+
+  const { data: existingConnection } = await supabase
+    .from('fable_connection')
+    .select('*')
+    .eq('id_pair', id_pair);
+  if(!existingConnection || existingConnection.length > 0){
+    return false;
+  }
+
   // Determine connection strength
-  const result = await generateResponseGPT4(
+  const result = await generateResponseChatGPT(
     `
     Please respond with only a number between 0 and 100 for how similar the same general premise is on the following two sentences. Where a 0 is that they're not even remotely similar and a 100 is that they're referring to the exact same event.
       
@@ -39,30 +49,24 @@ export async function formConnection(fable_1: fable, fable_2: fable) {
     - ${fable_2.summary.trim()}
     `
   );
+  if(!result) { return false; }
 
   const match = result.match(/\d+/);
   if (match && match[0]) {
+    const { error: createError } = await supabase
+      .from("fable_connection")
+      .insert({
+          id_pair,
+          fable_id_1: fable_1.id,
+          fable_id_2: fable_2.id,
+          strength: +match[0],
+        },
+      );
 
-    const id_pair = getSzudzikPair(fable_1.id, fable_2.id);
-    console.log(await prisma.fable_connection.findMany())
-    const existingConnection = await prisma.fable_connection.findFirst({
-      where: {
-        id_pair,
-      },
-    });
+    if (createError) {
+      return false;
+    }
 
-    console.log(id_pair, existingConnection);
-
-    if(existingConnection) { return false; }
-
-    await prisma.fable_connection.create({
-      data: {
-        id_pair,
-        fable_id_1: fable_1.id,
-        fable_id_2: fable_2.id,
-        strength: +match[0],
-      },
-    });
     return true;
   } else {
     return false;

@@ -1,6 +1,6 @@
 import { generateResponseGPT4 } from "../openai";
+import { supabase } from "../supabase";
 import { createResponse, formConnection, getRecentFables } from "../utils";
-import { prisma } from "../..";
 
 export default async function sleep(req: Request): Promise<Response> {
 
@@ -8,6 +8,7 @@ export default async function sleep(req: Request): Promise<Response> {
     try {
       return await processSleep(req);
     } catch (e) {
+      console.error(`Error sleeping: ${e}`);
       return createResponse(`Error sleeping: ${e}`, 500);
     }
   }
@@ -17,17 +18,31 @@ export default async function sleep(req: Request): Promise<Response> {
 
 async function processSleep(req: Request): Promise<Response> {
 
-  const fables = await prisma.fable.findMany();
+  const { data: fables, error } = await supabase.from('fable').select('*');
+
+  if(!fables || error){
+    return createResponse(`Error fetching fables`, 500);
+  }
+
+  const { count } = await supabase
+    .from('fable_connection')
+    .select('*', { count: 'exact', head: true });
   
   // Create connections between fables
-  let count = 0;
+  let c_count = 0;
   for(const fable_1 of fables) {
     for(const fable_2 of fables) {
-      const success = await formConnection(fable_1, fable_2);
-      if(success) { count++; }
+      const success = await formConnection(fable_1 as Fable, fable_2 as Fable);
+      if(success) { c_count++; }
     }
   }
 
+  const predicted_total_connections = (((fables.length * fables.length) - fables.length) / 2);
 
-  return createResponse(`Slept`, 200, { new_connections: count });
+  return createResponse(`Slept`, 200, {
+    explanation: `${count} + ${c_count} = ${predicted_total_connections}(?)`,
+    new_connections: c_count,
+    predicted_total_connections,
+    total_connections: (count ?? 0)+c_count,
+  });
 }

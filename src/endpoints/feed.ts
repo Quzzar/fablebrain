@@ -18,11 +18,12 @@ export default async function feed(req: Request): Promise<Response> {
 async function submitFeed(req: Request): Promise<Response> {
   const body = await req.json<any>();
 
+  const brain_id = body.brain_id;
   const input = body.input;
   const goal = body.goal;
 
-  if (!input || !goal) {
-    return createResponse(`Please provide input and goal`, 400);
+  if (!brain_id || !input || !goal) {
+    return createResponse(`Please provide brain_id, input, and goal`, 400);
   }
 
   // Summarize input
@@ -33,6 +34,10 @@ async function submitFeed(req: Request): Promise<Response> {
     ${input.trim()}
     `
   );
+
+  if (!result){
+    return createResponse(`Failed to process feed, please try again later`, 500);
+  }
   
   // Determine conclusion
   const recentFables = await getRecentFables();
@@ -63,8 +68,9 @@ async function submitFeed(req: Request): Promise<Response> {
 
   // Create fable
   const { error } = await supabase.from("fable").insert({
+    brain_id,
     summary: result,
-    goal: goal,
+    goal,
     conclusion,
   });
 
