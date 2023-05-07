@@ -50,8 +50,8 @@ async function submitInput(req: Request, brain: Brain): Promise<Response> {
           Please come up with a simple conclusion based on the following input and corresponding action. Include the name of the action attempted:
 
           Previous Input: ${latestResultedFable.input.trim()}
-          Corresponding Action: ${latestResultedAction.name.trim()}
-          Corresponding Action Description: ${latestResultedAction.description.trim()}
+          Corresponding Attempted Action: ${latestResultedAction.name.trim()}
+          Corresponding Attempted Action Description: ${latestResultedAction.description.trim()}
 
 
           New Input: ${info.trim()}

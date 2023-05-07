@@ -11,6 +11,7 @@
   "type": "module",
   "dependencies": {
     "@supabase/supabase-js": "^2.21.0",
-    "fuzzyset": "^1.0.7"
+    "fuzzyset": "^1.0.7",
+    "limiter": "^2.1.0"
   }
 }

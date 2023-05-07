@@ -3,7 +3,7 @@ import { supabase } from "./supabase";
 
 export async function generateResponseGPT4(
   prompt: string,
-  temperature = 0,
+  temperature = 0.7,
   max_tokens = 250
 ): Promise<string | null> {
   const model = "gpt-4";
@@ -71,7 +71,7 @@ export async function generateResponseGPT4(
 
 export async function generateResponseChatGPT(
   prompt: string,
-  temperature = 0,
+  temperature = 0.7,
   max_tokens = 250
 ): Promise<string | null> {
   const model = "gpt-3.5-turbo";
@@ -139,7 +139,7 @@ export async function generateResponseChatGPT(
 
 export async function generateResponseGPT3(
   prompt: string,
-  temperature = 0,
+  temperature = 0.7,
   max_tokens = 250
 ): Promise<string | null> {
   const model = "text-davinci-003";
