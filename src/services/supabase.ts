@@ -6,7 +6,7 @@ let supabase: SupabaseClient<any, "public", any>;
 export function initSupabase() {
   const supabaseUrl = 'https://phjfdmfelaagxneduomf.supabase.co';
   const supabaseKey = process.env.SUPABASE_KEY as string;
-  supabase = createClient<Database>(supabaseUrl, supabaseKey);
+  supabase = createClient(supabaseUrl, supabaseKey);
 }
 
 export { supabase };

@@ -1,6 +1,6 @@
 import { generateResponseGPT4 } from "../services/openai";
 import { supabase } from "../services/supabase";
-import { createResponse, formConnection, getBrainFromAuth, getRecentFables } from "../utils";
+import { createResponse, formConnection, getBrainFromAuth } from "../utils";
 
 export default async function sleep(req: Request): Promise<Response> {
   const brain = await getBrainFromAuth(req);
