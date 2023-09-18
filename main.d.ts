@@ -12,6 +12,15 @@ interface GeneratedText {
 interface Fable {
   id: number,
   input: string,
+  output: string,
+  type: 'MINOR' | 'MODERATE' | 'GREATER' | 'GRAND',
+  brain_id: number,
+  created_at: string,
+}
+
+interface Frame {
+  id: number,
+  input: string,
   conclusion: string,
   goal: string,
   brain_id: number,

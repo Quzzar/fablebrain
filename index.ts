@@ -7,6 +7,7 @@ import update from "./src/endpoints/update";
 import action from "./src/endpoints/action";
 import { RateLimiter } from "limiter";
 import { createResponse } from "./src/utils";
+import { startRuntime } from "./src/services/runtime";
 
 // Init Supabase
 initSupabase();
@@ -42,4 +43,7 @@ const server = Bun.serve({
     return new Response(`404!`);
   },
 });
+
+// Start the internal clock
+startRuntime();
 
